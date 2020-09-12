@@ -10,6 +10,8 @@ var timer, timerStep, timerIntervalId, timerCount, timerStart, timerStop;
 var player;
 var enemyCounts, enemyArr;
 var enemySpeed;
+const enemyFreq = 80;
+var enemyTimer;
 var outerBar, innerBar, healthBar;
 var startButton, restartButton;
 var bullet;
@@ -178,7 +180,8 @@ function setup() {
     // ----------- shoot setting done ------------ 
 
     // enemy groups
-    enemyCounts = 8;
+    enemyCounts = 4;
+    enemyTimer = 0;
     enemyArr = [];
     for (var i = 0; i < enemyCounts; i++) {
         var $404 = g.text("404", "50px sans-serif", "#808A87", randomNumber(g.canvas.width - 100), randomNumber(g.canvas.height - 100));
@@ -220,7 +223,22 @@ function die() {
     mainScene.visible = false;
     dieScene.visible = true;
     restartButton.press = function () {
-        document.location.reload();
+        timerStep = 0;
+        healthBar.inner.width = 200;
+        ammoBar.inner.width = 200;
+        g.remove(bullet);
+        g.remove(enemyArr);
+        g.state = play;
+        mainScene.visible = true;
+        dieScene.visible = false;
+        for (var i = 0; i < enemyCounts; i++) {
+            var $404 = g.text("404", "50px sans-serif", "#808A87", randomNumber(g.canvas.width - 100), randomNumber(g.canvas.height - 100));
+            mainScene.addChild($404);
+            enemyArr.push($404);
+        }
+        g.stage.putCenter(player, 0, 0);
+        timerStart();
+        g.resume();
     }
 }
 
@@ -270,6 +288,36 @@ function play() {
         g.state = die;
     }
 
+    // new enemy
+    enemyTimer++;
+    if (enemyTimer === enemyFreq) {
+        enemyTimer = 0;
+        var $404 = g.text("404", "50px sans-serif", "#808A87", randomNumber(g.canvas.width - 100), randomNumber(g.canvas.height - 100));
+        mainScene.addChild($404);
+        enemyArr.push($404);
+    }
+
+    // collision between bullet and enemy
+    enemyArr = enemyArr.filter(
+        function(enemy) {
+            var enemyIsAlive = true;
+            bullet = bullet.filter(
+                function(bullet) {
+                    if (g.hitTestRectangle(enemy, bullet)) {
+                        g.remove(bullet);
+                        enemyIsAlive = false;
+                        g.wait(500, function() {
+                            g.remove(enemy);
+                        })
+                        return false;
+                    } else {
+                        return true;
+                    }
+                }
+            );
+            return enemyIsAlive;
+        }
+    );
 
 }
 
