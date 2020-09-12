@@ -1,4 +1,4 @@
-var g = ga(1200, 900, setup, ["button.png"]);
+var g = ga(1200, 900, setup, ["button.png", "bullet.png"]);
 g.scaleToWindow();
 g.start();
 
@@ -11,7 +11,10 @@ var player;
 var enemyCounts, enemyArr;
 var enemySpeed;
 var outerBar, innerBar, healthBar;
-var startButton;
+var startButton, restartButton;
+var bullet;
+var outerBar1, innerBar1, ammoBar;
+var ifReload = false;
 
 const randomNumber = (max) => {
     parseInt(Math.random()*(max+1),10);
@@ -30,6 +33,7 @@ function setup() {
         192, 96
     );
 
+    // build start button
     startButton = g.button(buttonFrame);
     waitScene = g.group(startButton);
     waitScene.addChild(startButton);
@@ -65,11 +69,15 @@ function setup() {
 
     // ---------------- timer setting end ----------------
 
+    // die ui
+    restartButton = g.button(buttonFrame);
+    g.stage.putCenter(restartButton, 50, 150);
     dieMessage = g.text("You Died!", "64px Futura", "black");
     g.stage.putCenter(dieMessage, 0, 0);
     scores = g.text('scores: ' + timerStep.toFixed(2) + 's', "40px Futura", "black");
     g.stage.putCenter(scores, 0, 60);
-    dieScene = g.group(dieMessage, scores);
+    dieScene = g.group(dieMessage, scores, restartButton);
+    dieScene.addChild(restartButton);
     dieScene.visible = false;
 
     // --------------- scene setting end ----------------
@@ -80,6 +88,94 @@ function setup() {
     player = g.rectangle(32, 32, "red");
     g.stage.putCenter(player, 0, 0);
     mainScene.addChild(player);
+
+    // shoot setting
+    bullet = [];
+
+    // ammo bar
+    outerBar1 = g.rectangle(200, 20, 'white');
+    innerBar1 = g.rectangle(200, 20, 'blue');
+    ammoBar = g.group(outerBar1, innerBar1);
+    ammoBar.inner = innerBar1;
+    ammoBar.x = g.canvas.width / 2;
+    ammoBar.y = 18;
+    mainScene.addChild(ammoBar);
+
+    
+    g.key.upArrow.press = function () {
+        if (ammoBar.inner.width > 0 && !ifReload) {
+            g.shoot(
+                player,
+                4.71,
+                16,
+                8,
+                bullet,
+                function () {
+                    return g.sprite("bullet.png");
+                }
+            );
+            ammoBar.inner.width -= 15;
+        }
+    }
+
+    g.key.downArrow.press = function () {
+        if (ammoBar.inner.width > 0 && !ifReload) {
+            g.shoot(
+                player,
+                -4.71,
+                16,
+                8,
+                bullet,
+                function () {
+                    return g.sprite("bullet.png");
+                }
+            );
+            ammoBar.inner.width -= 15;
+        }
+       
+    }
+
+    g.key.leftArrow.press = function () {
+        if (ammoBar.inner.width > 0 && !ifReload) {
+            g.shoot(
+                player,
+                3.14,
+                16,
+                8,
+                bullet,
+                function () {
+                    return g.sprite("bullet.png");
+                }
+            );
+            ammoBar.inner.width -= 15;
+        }
+        
+    }
+
+    g.key.rightArrow.press = function () {
+        if (ammoBar.inner.width > 0 && !ifReload) {
+            g.shoot(
+                player,
+                0,
+                16,
+                8,
+                bullet,
+                function () {
+                    return g.sprite("bullet.png");
+                }
+            );
+            ammoBar.inner.width -= 15;
+        }
+      
+    }
+
+    // reload
+    g.key.space.press = function () {
+        ammoBar.inner.width = 0;
+        ifReload = true;
+    }
+
+    // ----------- shoot setting done ------------ 
 
     // enemy groups
     enemyCounts = 8;
@@ -118,10 +214,14 @@ function wait() {
 }
 
 function die() {
+    g.pause();
     timerStop();
     scores.content = 'scores: ' + timerStep.toFixed(2) + 's';
     mainScene.visible = false;
     dieScene.visible = true;
+    restartButton.press = function () {
+        document.location.reload();
+    }
 }
 
 function updateEnemySpeed (enemy) {
@@ -136,6 +236,7 @@ function play() {
 
     // timer on
     g.move(player);
+    g.move(bullet);
     g.contain(player, g.stage.localBounds);
     var playerHit = false;
 
@@ -148,6 +249,15 @@ function play() {
         }
 
     });
+
+    // reload
+    if (ifReload) {
+        if (ammoBar.inner.width >= 200) {
+            ifReload = false;
+        } else {
+            ammoBar.inner.width += 2;
+        }
+    }
 
     if (playerHit) {
         player.alpha = 0.5;
