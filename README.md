@@ -19,7 +19,7 @@
 
 ### Play Online
 
-[Here](github.io.com/404Block/)
+[Here](https://scyq.github.io/404Block/)
 
 ### Play Offline
 
