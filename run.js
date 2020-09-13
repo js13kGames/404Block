@@ -110,7 +110,7 @@ function setup() {
                 player,
                 4.71,
                 16,
-                8,
+                20,
                 bullet,
                 function () {
                     return g.sprite("bullet.png");
@@ -126,7 +126,7 @@ function setup() {
                 player,
                 -4.71,
                 16,
-                8,
+                20,
                 bullet,
                 function () {
                     return g.sprite("bullet.png");
@@ -143,7 +143,7 @@ function setup() {
                 player,
                 3.14,
                 16,
-                8,
+                20,
                 bullet,
                 function () {
                     return g.sprite("bullet.png");
@@ -160,7 +160,7 @@ function setup() {
                 player,
                 0,
                 16,
-                8,
+                20,
                 bullet,
                 function () {
                     return g.sprite("bullet.png");
@@ -180,7 +180,7 @@ function setup() {
     // ----------- shoot setting done ------------ 
 
     // enemy groups
-    enemyCounts = 4;
+    enemyCounts = 5;
     enemyTimer = 0;
     enemyArr = [];
     for (var i = 0; i < enemyCounts; i++) {
@@ -306,6 +306,7 @@ function play() {
                     if (g.hitTestRectangle(enemy, bullet)) {
                         g.remove(bullet);
                         enemyIsAlive = false;
+                        enemy.fillStyle = "white";
                         g.wait(500, function() {
                             g.remove(enemy);
                         })
